@@ -14,6 +14,9 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { TableFilters } from "@/components/TableFilters";
 import { useLeadPolling } from "@/hooks/useLeadPolling";
 import { LeadStatus } from "@/types";
+import { TableSkeleton } from "./TableSkeleton";
+import { motion } from "framer-motion";
+import { fadeIn, staggerChildren } from "@/lib/animations";
 
 const LEADS_PER_PAGE = 10;
 
@@ -29,11 +32,11 @@ export function LeadTable() {
   }
 
   if (isLoading) {
-    return <div className="text-center">Loading leads...</div>;
+    return <TableSkeleton />;
   }
 
   return (
-    <div className="space-y-4">
+    <motion.div {...fadeIn} className="space-y-4">
       <TableFilters
         currentStatus={statusFilter}
         onStatusChange={setStatusFilter}
@@ -53,28 +56,34 @@ export function LeadTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leads.map((lead) => (
-              <TableRow key={lead.id}>
-                <TableCell>{lead.name}</TableCell>
-                <TableCell>{lead.email}</TableCell>
-                <TableCell>{lead.phone}</TableCell>
-                <TableCell
-                  className="max-w-xs truncate"
-                  title={lead.property_address}
-                >
-                  {lead.property_address}
-                </TableCell>
-                <TableCell>
-                  {lead.preferred_viewing_date
-                    ? format(new Date(lead.preferred_viewing_date), "PPp")
-                    : "Not specified"}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={lead.status} />
-                </TableCell>
-                <TableCell>{format(new Date(lead.created_at), "PP")}</TableCell>
-              </TableRow>
-            ))}
+            <motion.div {...staggerChildren} className="space-y-2">
+              {leads.map((lead) => (
+                <motion.div key={lead.id} {...fadeIn}>
+                  <TableRow>
+                    <TableCell>{lead.name}</TableCell>
+                    <TableCell>{lead.email}</TableCell>
+                    <TableCell>{lead.phone}</TableCell>
+                    <TableCell
+                      className="max-w-xs truncate"
+                      title={lead.property_address}
+                    >
+                      {lead.property_address}
+                    </TableCell>
+                    <TableCell>
+                      {lead.preferred_viewing_date
+                        ? format(new Date(lead.preferred_viewing_date), "PPp")
+                        : "Not specified"}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={lead.status} />
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(lead.created_at), "PP")}
+                    </TableCell>
+                  </TableRow>
+                </motion.div>
+              ))}
+            </motion.div>
             {leads.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center">
@@ -85,6 +94,6 @@ export function LeadTable() {
           </TableBody>
         </Table>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -15,6 +15,9 @@ import {
 import { useLeadSubmission } from "@/hooks/useLeadSubmission";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { ErrorMessage } from "@/components/ErrorMessage";
+import { motion } from "framer-motion";
+import { fadeIn } from "@/lib/animations";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 
 export function LeadForm() {
   const {
@@ -57,9 +60,10 @@ export function LeadForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
+        <motion.form
+          {...fadeIn}
           className="space-y-6"
+          onSubmit={form.handleSubmit(onSubmit)}
           onChange={resetSubmissionState}
         >
           <FormField
@@ -125,10 +129,21 @@ export function LeadForm() {
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Submitting..." : "Schedule Viewing"}
+          <Button type="submit" disabled={isSubmitting} className="w-full">
+            {isSubmitting ? (
+              <div className="flex items-center justify-center">
+                <LoadingSkeleton
+                  width="20px"
+                  height="20px"
+                  className="rounded-full mr-2"
+                />
+                Submitting...
+              </div>
+            ) : (
+              "Schedule Viewing"
+            )}
           </Button>
-        </form>
+        </motion.form>
       </CardContent>
     </Card>
   );
