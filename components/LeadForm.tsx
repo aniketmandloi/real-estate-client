@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { leadFormSchema } from "@/lib/validations";
-import type { LeadInput } from "@/types";
+import { leadFormSchema, type LeadFormData } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/FormField";
 import {
   Card,
   CardContent,
@@ -15,14 +12,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { useLeadSubmission } from "@/hooks/useLeadSubmission";
 
 export function LeadForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const {
+    isSubmitting,
+    submitSuccess,
+    submitError,
+    submitLead,
+    resetSubmissionState,
+  } = useLeadSubmission();
 
-  const form = useForm<LeadInput>({
+  const form = useForm<LeadFormData>({
     resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: "",
@@ -33,30 +34,12 @@ export function LeadForm() {
     },
   });
 
-  async function onSubmit(data: LeadInput) {
+  async function onSubmit(data: LeadFormData) {
     try {
-      setIsSubmitting(true);
-      setSubmitError(null);
-
-      // TODO: Replace with your API endpoint
-      const response = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit lead");
-      }
-
-      setSubmitSuccess(true);
+      await submitLead(data);
       form.reset();
     } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : "Something went wrong"
-      );
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error submitting lead:", error);
     }
   }
 
@@ -70,86 +53,68 @@ export function LeadForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              {...form.register("name")}
-              className={cn(form.formState.errors.name && "border-red-500")}
-            />
-            {form.formState.errors.name && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.name.message}
-              </p>
-            )}
-          </div>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6"
+          onChange={resetSubmissionState}
+        >
+          <FormField
+            id="name"
+            label="Name"
+            register={form.register}
+            error={form.formState.errors.name}
+            placeholder="John Doe"
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              {...form.register("email")}
-              className={cn(form.formState.errors.email && "border-red-500")}
-            />
-            {form.formState.errors.email && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.email.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="email"
+            label="Email"
+            type="email"
+            register={form.register}
+            error={form.formState.errors.email}
+            placeholder="john@example.com"
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              {...form.register("phone")}
-              className={cn(form.formState.errors.phone && "border-red-500")}
-            />
-            {form.formState.errors.phone && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.phone.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="phone"
+            label="Phone Number"
+            type="tel"
+            register={form.register}
+            error={form.formState.errors.phone}
+            placeholder="+1 (555) 000-0000"
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="property_address">Property Address</Label>
-            <Input
-              id="property_address"
-              {...form.register("property_address")}
-              className={cn(
-                form.formState.errors.property_address && "border-red-500"
-              )}
-            />
-            {form.formState.errors.property_address && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.property_address.message}
-              </p>
-            )}
-          </div>
+          <FormField
+            id="property_address"
+            label="Property Address"
+            register={form.register}
+            error={form.formState.errors.property_address}
+            placeholder="123 Main St, City, State"
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="preferred_viewing_date">
-              Preferred Viewing Date (Optional)
-            </Label>
-            <Input
-              id="preferred_viewing_date"
-              type="datetime-local"
-              {...form.register("preferred_viewing_date")}
-            />
-          </div>
+          <FormField
+            id="preferred_viewing_date"
+            label="Preferred Viewing Date"
+            type="datetime-local"
+            register={form.register}
+            required={false}
+            error={form.formState.errors.preferred_viewing_date}
+          />
 
           {submitError && (
-            <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+            <div
+              role="alert"
+              className="p-3 text-sm text-red-500 bg-red-50 rounded-md"
+            >
               {submitError}
             </div>
           )}
 
           {submitSuccess && (
-            <div className="p-3 text-sm text-green-500 bg-green-50 rounded-md">
+            <div
+              role="alert"
+              className="p-3 text-sm text-green-500 bg-green-50 rounded-md"
+            >
               Thank you! We&apos;ll contact you shortly to confirm your viewing.
             </div>
           )}

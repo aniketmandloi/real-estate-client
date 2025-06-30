@@ -31,11 +31,7 @@ export const leadFormSchema = z.object({
     .min(10, "Please provide a complete address")
     .max(1000, "Address is too long"),
 
-  preferred_viewing_date: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((val) => (val ? new Date(val) : null)), // Transform to Date or null
+  preferred_viewing_date: z.string().optional(),
 });
 
 // API request validation schemas
