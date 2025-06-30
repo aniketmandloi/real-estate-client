@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { leadFormSchema, leadFilterSchema } from "@/lib/validations";
-import { createLead, getLeads, getLeadById } from "@/lib/database";
+import { leadFormSchema } from "@/lib/validations";
+import { createLead, getLeads } from "@/lib/database";
 import { LeadStatus } from "@/types";
 
 // POST /api/leads - Create a new lead
