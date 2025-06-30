@@ -33,9 +33,9 @@ export const leadFormSchema = z.object({
 
   preferred_viewing_date: z
     .string()
-    .datetime("Please enter a valid date and time")
+    .datetime()
     .optional()
-    .transform((val) => val || undefined), // Convert empty string to undefined
+    .transform((val) => (val ? new Date(val) : null)), // Transform to Date or null
 });
 
 // API request validation schemas
