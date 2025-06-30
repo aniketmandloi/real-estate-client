@@ -1,0 +1,146 @@
+{
+  "name": "Real Estate Lead Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook",
+        "options": {
+          "responseMode": "responseNode"
+        },
+        "authentication": "headerAuth",
+        "httpMethod": "POST"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "leads",
+        "where": {
+          "id": "={{ $json.id }}"
+        },
+        "set": {
+          "status": "emailed",
+          "email_sent_at": "={{ $now }}"
+        }
+      },
+      "name": "Update Lead Status - Email",
+      "type": "n8n-nodes-base.postgres",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.SENDGRID_FROM_EMAIL }}",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Property Viewing Request Confirmation",
+        "text": "=Dear {{ $json.name }},\n\nThank you for your interest in viewing the property at {{ $json.property_address }}.\n\nWe have received your request and our team will contact you shortly to confirm the viewing details.\n\nBest regards,\nYour Real Estate Team"
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.sendGrid",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "leads",
+        "where": {
+          "id": "={{ $json.id }}"
+        },
+        "set": {
+          "status": "texted",
+          "sms_sent_at": "={{ $now }}"
+        }
+      },
+      "name": "Update Lead Status - SMS",
+      "type": "n8n-nodes-base.postgres",
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "fromNumber": "={{ $env.TWILIO_PHONE_NUMBER }}",
+        "toNumber": "={{ $json.phone }}",
+        "message": "=Hi {{ $json.name }}, we've received your request to view the property at {{ $json.property_address }}. Our team will contact you shortly to confirm the details."
+      },
+      "name": "Send SMS",
+      "type": "n8n-nodes-base.twilio",
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.WEBHOOK_CALLBACK_URL }}",
+        "options": {
+          "method": "POST",
+          "body": {
+            "leadId": "={{ $json.id }}",
+            "status": "completed"
+          },
+          "headers": {
+            "Authorization": "=Bearer {{ $env.WEBHOOK_SECRET }}"
+          }
+        }
+      },
+      "name": "Complete Lead",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status - Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status - Email": {
+      "main": [
+        [
+          {
+            "node": "Send SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send SMS": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status - SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead Status - SMS": {
+      "main": [
+        [
+          {
+            "node": "Complete Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
