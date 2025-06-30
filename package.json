@@ -14,12 +14,14 @@
     "db:seed": "ts-node scripts/init-database.ts"
   },
   "dependencies": {
+    "@geist-ui/core": "^2.3.8",
     "@hookform/resolvers": "^5.1.1",
     "@prisma/client": "^6.10.1",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "geist": "^1.4.2",
     "lucide-react": "^0.525.0",
     "next": "15.3.4",
     "react": "^19.0.0",
