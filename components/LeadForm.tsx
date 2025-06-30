@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { leadFormSchema, type LeadFormValues } from "@/lib/validations";
+import { leadFormSchema } from "@/lib/validations";
+import type { LeadInput } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ export function LeadForm() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const form = useForm<LeadFormValues>({
+  const form = useForm<LeadInput>({
     resolver: zodResolver(leadFormSchema),
     defaultValues: {
       name: "",
@@ -32,7 +33,7 @@ export function LeadForm() {
     },
   });
 
-  async function onSubmit(data: LeadFormValues) {
+  async function onSubmit(data: LeadInput) {
     try {
       setIsSubmitting(true);
       setSubmitError(null);
