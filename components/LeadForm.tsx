@@ -37,13 +37,19 @@ export function LeadForm() {
       email: "",
       phone: "",
       property_address: "",
-      preferred_viewing_date: "",
+      preferred_viewing_date: null,
     },
   });
 
   async function onSubmit(data: LeadFormData) {
     try {
-      await submitLead(data);
+      const formData = {
+        ...data,
+        preferred_viewing_date: data.preferred_viewing_date
+          ? new Date(data.preferred_viewing_date).toISOString()
+          : null,
+      };
+      await submitLead(formData);
       form.reset();
     } catch (err) {
       handleError(err);

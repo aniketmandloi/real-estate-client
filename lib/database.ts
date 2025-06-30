@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { Prisma, Lead as PrismaLead, LeadStatus } from "@prisma/client";
+import { LeadStatus as CustomLeadStatus } from "@/types";
 
 // Use Prisma's generated types instead of custom types
 type Lead = PrismaLead;
@@ -12,13 +13,21 @@ type LeadInput = Omit<
   | "sms_sent_at"
   | "completed_at"
   | "error_log"
->;
+  | "preferred_viewing_date"
+> & {
+  preferred_viewing_date?: string | null;
+};
 type LeadStats = { total: number; by_status: Record<LeadStatus, number> };
 
 export async function createLead(data: LeadInput): Promise<Lead> {
+  const { preferred_viewing_date, ...rest } = data;
+
   return prisma.lead.create({
     data: {
-      ...data,
+      ...rest,
+      preferred_viewing_date: preferred_viewing_date
+        ? new Date(preferred_viewing_date)
+        : null,
       status: "received",
     },
   });
@@ -39,22 +48,30 @@ export async function updateLeadStatus(
   });
 }
 
-export async function getLeads(
-  options: {
-    status?: LeadStatus;
-    page?: number;
-    limit?: number;
-  } = {}
-): Promise<Lead[]> {
-  const { status, page = 1, limit = 10 } = options;
-  const skip = (page - 1) * limit;
+interface GetLeadsOptions {
+  status?: CustomLeadStatus | null;
+  page?: number;
+  limit?: number;
+}
 
-  return prisma.lead.findMany({
-    where: status ? { status } : undefined,
-    orderBy: { created_at: "desc" },
-    skip,
-    take: limit,
-  });
+export async function getLeads(options: GetLeadsOptions = {}) {
+  try {
+    const { status, page = 1, limit = 10 } = options;
+    const leads = await prisma.lead.findMany({
+      where: status ? { status } : {},
+      orderBy: { created_at: "desc" },
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+
+    // Add console.log for debugging
+    console.log("Database query result:", leads);
+
+    return leads;
+  } catch (error) {
+    console.error("Database error:", error);
+    throw error;
+  }
 }
 
 export async function getLeadById(id: string): Promise<Lead | null> {
@@ -77,7 +94,7 @@ export async function getLeadStats(): Promise<LeadStats> {
     total,
     by_status: stats.reduce(
       (acc, { status, _count }) => {
-        acc[status] = _count.status;
+        acc[status as LeadStatus] = _count.status;
         return acc;
       },
       {

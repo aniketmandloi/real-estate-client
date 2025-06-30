@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { leadFormSchema, leadFilterSchema } from "@/lib/validations";
 import { createLead, getLeads, getLeadById } from "@/lib/database";
-// import { LeadStatus } from "@/types";
+import { LeadStatus } from "@/types";
 
 // POST /api/leads - Create a new lead
 export async function POST(request: Request) {
@@ -41,26 +41,14 @@ export async function POST(request: Request) {
 // GET /api/leads - Get leads with optional filtering
 export async function GET(request: Request) {
   try {
-    const { searchParams, pathname } = new URL(request.url);
-    const id = pathname.split("/").pop();
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get("status") as LeadStatus | null;
 
-    // Handle single lead retrieval
-    if (id && id !== "leads") {
-      const lead = await getLeadById(id);
-      if (!lead) {
-        return NextResponse.json({ error: "Lead not found" }, { status: 404 });
-      }
-      return NextResponse.json(lead);
-    }
+    const leads = await getLeads({ status });
 
-    // Handle lead listing with filters
-    const validatedParams = leadFilterSchema.parse({
-      status: searchParams.get("status"),
-      page: searchParams.get("page"),
-      limit: searchParams.get("limit"),
-    });
+    // Add console.log for debugging
+    console.log("Fetched leads:", leads);
 
-    const leads = await getLeads(validatedParams);
     return NextResponse.json(leads);
   } catch (error) {
     console.error("Error fetching leads:", error);

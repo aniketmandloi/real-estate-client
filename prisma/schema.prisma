@@ -24,17 +24,17 @@ enum LeadStatus {
 
 model Lead {
   id                    String     @id @default(uuid())
-  name                  String     @db.VarChar(255)
-  email                 String     @db.VarChar(255)
-  phone                 String     @db.VarChar(20)
-  property_address      String     @db.Text
+  name                  String
+  email                 String
+  phone                 String
+  property_address      String
   preferred_viewing_date DateTime?
-  status               LeadStatus  @default(received)
-  created_at           DateTime    @default(now())
-  email_sent_at        DateTime?
-  sms_sent_at          DateTime?
-  completed_at         DateTime?
-  error_log            Json?
+  status                String     @default("received")
+  created_at            DateTime   @default(now())
+  email_sent_at         DateTime?
+  sms_sent_at           DateTime?
+  completed_at          DateTime?
+  error_log             Json?
 
   @@index([status])
   @@index([created_at(sort: Desc)])

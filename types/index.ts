@@ -13,17 +13,17 @@ export interface LeadInput {
   email: string;
   phone: string;
   property_address: string;
-  preferred_viewing_date?: string;
+  preferred_viewing_date?: string | null;
 }
 
 // Complete lead interface including system fields
 export interface Lead extends LeadInput {
   id: string;
   status: LeadStatus;
-  created_at: string;
-  email_sent_at?: string;
-  sms_sent_at?: string;
-  completed_at?: string;
+  created_at: Date;
+  email_sent_at?: Date;
+  sms_sent_at?: Date;
+  completed_at?: Date;
   error_log?: Record<string, unknown>;
 }
 

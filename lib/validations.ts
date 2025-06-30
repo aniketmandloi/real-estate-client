@@ -1,37 +1,16 @@
-import * as z from "zod";
+import { z } from "zod";
 
 // Regular expressions for validation
-const PHONE_REGEX = /^\+?[\d\s-()]{10,}$/;
-const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+// const PHONE_REGEX = /^\+?[\d\s-()]{10,}$/;
+// const EMAIL_REGEX = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 // Lead form validation schema
 export const leadFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(255, "Name must be less than 255 characters")
-    .regex(
-      /^[a-zA-Z\s-']+$/,
-      "Name can only contain letters, spaces, hyphens and apostrophes"
-    ),
-
-  email: z
-    .string()
-    .email("Invalid email address")
-    .regex(EMAIL_REGEX, "Invalid email format")
-    .max(255, "Email must be less than 255 characters"),
-
-  phone: z
-    .string()
-    .regex(PHONE_REGEX, "Please enter a valid phone number")
-    .max(20, "Phone number is too long"),
-
-  property_address: z
-    .string()
-    .min(10, "Please provide a complete address")
-    .max(1000, "Address is too long"),
-
-  preferred_viewing_date: z.string().optional(),
+  name: z.string().min(2).max(255),
+  email: z.string().email().max(255),
+  phone: z.string().max(20),
+  property_address: z.string().min(10).max(1000),
+  preferred_viewing_date: z.string().nullable().optional(),
 });
 
 // API request validation schemas
