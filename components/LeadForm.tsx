@@ -20,13 +20,8 @@ import { fadeIn } from "@/lib/animations";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 
 export function LeadForm() {
-  const {
-    isSubmitting,
-    submitSuccess,
-    submitError,
-    submitLead,
-    resetSubmissionState,
-  } = useLeadSubmission();
+  const { isSubmitting, submitSuccess, submitError, submitLead } =
+    useLeadSubmission();
 
   const { error, handleError } = useErrorHandler();
 
@@ -70,7 +65,6 @@ export function LeadForm() {
           {...fadeIn}
           className="space-y-6"
           onSubmit={form.handleSubmit(onSubmit)}
-          onChange={resetSubmissionState}
         >
           <FormField
             id="name"

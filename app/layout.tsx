@@ -1,9 +1,8 @@
-import { GeistSans } from "geist/font/sans";
 import { Metadata } from "next";
-
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
+import { Providers } from "./providers";
 import { Header } from "@/components/Header";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Real Estate Lead Management",
@@ -20,11 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={GeistSans.className}>
-      <body className="min-h-screen bg-background text-foreground">
-        <ErrorBoundary>
+      <body className="min-h-screen bg-gray-50">
+        <Providers>
           <Header />
           <main className="container mx-auto px-4 py-8">{children}</main>
-        </ErrorBoundary>
+        </Providers>
       </body>
     </html>
   );

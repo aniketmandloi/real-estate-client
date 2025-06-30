@@ -4,19 +4,11 @@ import { useLeadPolling } from "@/hooks/useLeadPolling";
 import { TableSkeleton } from "./TableSkeleton";
 
 export function LeadTable() {
-  const { leads, isLoading, error } = useLeadPolling();
+  const { data: leads, isLoading, error } = useLeadPolling();
 
-  if (error) {
-    return <div className="p-4 text-red-500 bg-red-50 rounded-lg">{error}</div>;
-  }
-
-  if (isLoading) {
-    return <TableSkeleton />;
-  }
-
-  if (!leads?.length) {
-    return <div className="text-center py-8 text-gray-500">No leads found</div>;
-  }
+  if (isLoading) return <TableSkeleton />;
+  if (error) return <div>Error loading leads</div>;
+  if (!leads?.length) return <div>No leads found</div>;
 
   return (
     <div className="overflow-x-auto">

@@ -7,29 +7,10 @@ import { LoadingSkeleton } from "./LoadingSkeleton";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/animations";
 
-interface StatsCardsProps {
-  isLoading?: boolean;
-}
+export function StatsCards() {
+  const { data: stats, isLoading } = useLeadStats();
 
-export function StatsCards({ isLoading = false }: StatsCardsProps) {
-  const { stats, error } = useLeadStats();
-
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
-  }
-
-  if (isLoading || !stats) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="p-6 bg-white rounded-lg shadow-sm">
-            <LoadingSkeleton width="100px" height="24px" className="mb-2" />
-            <LoadingSkeleton width="60px" height="32px" />
-          </div>
-        ))}
-      </div>
-    );
-  }
+  if (isLoading || !stats) return <LoadingSkeleton />;
 
   return (
     <motion.div {...fadeIn} className="grid grid-cols-1 md:grid-cols-3 gap-4">
