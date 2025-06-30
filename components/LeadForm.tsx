@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLeadSubmission } from "@/hooks/useLeadSubmission";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { ErrorMessage } from "@/components/ErrorMessage";
 
 export function LeadForm() {
   const {
@@ -22,6 +24,8 @@ export function LeadForm() {
     submitLead,
     resetSubmissionState,
   } = useLeadSubmission();
+
+  const { error, handleError } = useErrorHandler();
 
   const form = useForm<LeadFormData>({
     resolver: zodResolver(leadFormSchema),
@@ -38,8 +42,8 @@ export function LeadForm() {
     try {
       await submitLead(data);
       form.reset();
-    } catch (error) {
-      console.error("Error submitting lead:", error);
+    } catch (err) {
+      handleError(err);
     }
   }
 
@@ -100,6 +104,8 @@ export function LeadForm() {
             required={false}
             error={form.formState.errors.preferred_viewing_date}
           />
+
+          {error && <ErrorMessage message={error} className="mb-4" />}
 
           {submitError && (
             <div
