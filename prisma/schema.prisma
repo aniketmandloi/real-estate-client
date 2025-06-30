@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum LeadStatus {
+  received
+  emailed
+  texted
+  completed
+  error
+}
+
+model Lead {
+  id                    String     @id @default(uuid())
+  name                  String     @db.VarChar(255)
+  email                 String     @db.VarChar(255)
+  phone                 String     @db.VarChar(20)
+  property_address      String     @db.Text
+  preferred_viewing_date DateTime?
+  status               LeadStatus  @default(received)
+  created_at           DateTime    @default(now())
+  email_sent_at        DateTime?
+  sms_sent_at          DateTime?
+  completed_at         DateTime?
+  error_log            Json?
+
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+}

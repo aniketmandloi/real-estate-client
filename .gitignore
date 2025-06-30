@@ -31,7 +31,8 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env.local
 
 # vercel
 .vercel
@@ -44,3 +45,4 @@ next-env.d.ts
 real_estate_lead_spec.md
 real_estate_lead_implementation_plan.md
 real_estate_lead_request.md
+/lib/generated/prisma
