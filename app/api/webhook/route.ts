@@ -9,8 +9,15 @@ const prisma = new PrismaClient();
 // POST /api/webhook - Handle n8n workflow status updates
 export async function POST(request: Request) {
   try {
+    console.log("Webhook received:", {
+      headers: Object.fromEntries(request.headers.entries()),
+      url: request.url,
+    });
+
     // Verify webhook secret
     const authHeader = request.headers.get("authorization");
+    console.log("Auth header:", authHeader);
+    console.log("Expected:", `Bearer ${process.env.WEBHOOK_SECRET}`);
     if (authHeader !== `Bearer ${process.env.WEBHOOK_SECRET}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -45,6 +52,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: "updated" });
   } catch (error) {
+    console.error("Detailed webhook error:", error);
     console.error("Webhook processing error:", error);
 
     if (error instanceof ValidationError) {

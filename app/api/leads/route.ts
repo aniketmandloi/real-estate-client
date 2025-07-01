@@ -15,7 +15,12 @@ export async function POST(request: Request) {
 
     // Trigger n8n webhook for automation
     try {
-      await fetch(process.env.N8N_WEBHOOK_URL!, {
+      console.log("Triggering n8n webhook:", {
+        url: process.env.N8N_WEBHOOK_URL,
+        lead: lead,
+      });
+
+      const webhookResponse = await fetch(process.env.N8N_WEBHOOK_URL!, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -23,8 +28,12 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify(lead),
       });
+
+      console.log("n8n webhook response:", {
+        status: webhookResponse.status,
+        body: await webhookResponse.text(),
+      });
     } catch (error) {
-      // Log webhook error but don't fail the request
       console.error("Failed to trigger n8n webhook:", error);
     }
 
