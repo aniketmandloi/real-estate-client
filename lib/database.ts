@@ -81,30 +81,41 @@ export async function getLeadById(id: string): Promise<Lead | null> {
 }
 
 export async function getLeadStats(): Promise<LeadStats> {
-  const stats = await prisma.lead.groupBy({
+  // Get total leads
+  const total = await prisma.lead.count();
+
+  // Get status counts
+  const statusCounts = await prisma.lead.groupBy({
     by: ["status"],
     _count: {
       status: true,
     },
   });
 
-  const total = await prisma.lead.count();
+  // Get email and SMS counts
+  const emailCount = await prisma.lead.count({
+    where: {
+      email_sent_at: { not: null },
+    },
+  });
+
+  const smsCount = await prisma.lead.count({
+    where: {
+      sms_sent_at: { not: null },
+    },
+  });
 
   return {
     total,
-    by_status: stats.reduce(
-      (acc, { status, _count }) => {
-        acc[status as LeadStatus] = _count.status;
-        return acc;
-      },
-      {
-        received: 0,
-        emailed: 0,
-        texted: 0,
-        completed: 0,
-        error: 0,
-      }
-    ),
+    by_status: {
+      received:
+        statusCounts.find((s) => s.status === "received")?._count.status || 0,
+      emailed: emailCount, // Use actual email sent count
+      texted: smsCount, // Use actual SMS sent count
+      completed:
+        statusCounts.find((s) => s.status === "completed")?._count.status || 0,
+      error: statusCounts.find((s) => s.status === "error")?._count.status || 0,
+    },
   };
 }
 

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { webhookSchema } from "@/lib/validations";
 import { updateLeadStatus, logLeadError } from "@/lib/database";
 import { ValidationError } from "@/lib/errors";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // POST /api/webhook - Handle n8n workflow status updates
 export async function POST(request: Request) {
@@ -24,9 +27,21 @@ export async function POST(request: Request) {
 
     // Update lead status with appropriate timestamp
     const timestampField = `${status}_at` as const;
-    await updateLeadStatus(leadId, status, {
-      [timestampField]: new Date(timestamp),
-    });
+
+    // Don't change status for email/sms, only update timestamp
+    if (status === "emailed" || status === "texted") {
+      await prisma.lead.update({
+        where: { id: leadId },
+        data: {
+          [timestampField]: new Date(timestamp),
+        },
+      });
+    } else {
+      // For other statuses (completed, error), update both status and timestamp
+      await updateLeadStatus(leadId, status, {
+        [timestampField]: new Date(timestamp),
+      });
+    }
 
     return NextResponse.json({ status: "updated" });
   } catch (error) {
